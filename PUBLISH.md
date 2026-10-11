@@ -74,3 +74,81 @@ Copy-Item D:\dsh\.local-llm\plugins\dsh-task-splitter\bin -Recurse C:\Users\pc\.
 
 （也可以用 `npm pack` 出的 `.tgz` 走 `dsh plugin --profile desktop add file:...tgz` 正式安装，
 这样以后 `dsh plugin` 的依赖管理不会把它当"未登记目录"清掉。）
+
+
+# 上架材料（直接复制粘贴用）
+
+## 一、GitHub 仓库信息
+
+| 项 | 值 |
+|---|---|
+| 仓库名 | `dsh-task-splitter` |
+| 可见性 | Public |
+| 初始化 | **不要**勾选 README / .gitignore / License（保持空仓库，便于我直接 push） |
+| Description | `DSH host plugin: detect long tasks (long-output & multi-step) and auto-split them for small-context local models — parts skeleton or PLAN.md ledger + injected execution rules.` |
+| Topics | `dsh-plugin` `dsh` `deepseek-harness` `local-model` `long-task` `planner` `llama-cpp` |
+| Release | tag `v0.1.0`（我已在本机打好，push 时 `--tags` 一起带上） |
+
+## 二、awesome-dsh-plugin 的 PR 文案
+
+> 仓库：往清单里加一条（找到 `README.md` 的插件列表，按现有格式追加）
+
+**标题**
+
+```
+Add dsh-task-splitter: host-side long-task detection & auto-splitting for small-context models
+```
+
+**正文**
+
+```markdown
+### What it does
+
+`dsh-task-splitter` is a DSH **host** plugin that detects long tasks and splits them *before* they fail —
+aimed at small-context local models (llama.cpp / Ollama, e.g. Qwen3-27B IQ2 with `maxTokens: 8192`).
+
+It separates two kinds of "long task", which need different remedies:
+
+| | Lane A — long output | Lane B — long workflow |
+|---|---|---|
+| Example | "write a 3000-word report, 4 sections" | **"pick me a stock likely to rise tomorrow"** |
+| Bottleneck | the per-request output budget (`maxTokens`) | **step count / context**: tool output floods the window, small models drift, intermediate results get lost |
+| Action | scaffolds `parts/NN-*.md` + `MANIFEST.json`; one part per reply, then `assemble` | scaffolds `PLAN.md` + `notes/`; plan first, one step per reply, results on disk |
+
+Detection runs on the host (no model cooperation needed) and the procedure is injected with
+`agent/pre-step`, prepended to the *same* request — no extra round trip.
+
+### Why it may be worth listing
+
+- No comparable plugin found in the ecosystem: existing entries are task **boards**
+  (`dsh-taskboard`, `dsh-task-panel`) or experience-based **planners** (`dsh-task-planner`);
+  none of them detect long tasks on the host side and scaffold the split.
+- Complements output-limit continuation plugins: those fix a truncated reply, this one avoids
+  producing a truncated reply (or a 15-step drift) in the first place.
+- Local-first: no network, no credentials, no telemetry; default config only affects `qwen-local`.
+
+### Install
+
+```bash
+dsh plugin --profile <your-profile> add dsh-task-splitter
+```
+
+- Repository: <https://github.com/<YOUR-USER>/dsh-task-splitter>
+- License: MIT
+- Verified on: Windows, DSH 0.2.0-rc.2, llama.cpp-served Qwen3.8-27B (IQ2/IQ4)
+- Tests: 27 offline simulation cases (`test-sim.mjs`)
+```
+
+## 三、发布后要补的两处（我可以做，或你在网页上点两下）
+
+1. `package.json` 增加 `repository` 字段（下次发版生效）：
+
+   ```json
+   "repository": { "type": "git", "url": "git+https://github.com/<YOUR-USER>/dsh-task-splitter.git" },
+   "homepage": "https://github.com/<YOUR-USER>/dsh-task-splitter#readme",
+   "bugs": { "url": "https://github.com/<YOUR-USER>/dsh-task-splitter/issues" }
+   ```
+
+2. 仓库的 About 区域：Description + Topics（见上表）。Topics 打上 `dsh-plugin` 后，
+   `find_dsh_plugins` 的 GitHub topic 源就能搜到；dsh.so / dsh.works / dsh-plugin-radar
+   会自动抓取 npm 与 GitHub。

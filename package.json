@@ -12,7 +12,7 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "dsh-task-parts": "./bin/task-parts.mjs"
+    "dsh-task-parts": "bin/task-parts.mjs"
   },
   "files": [
     "lib/index.js",
