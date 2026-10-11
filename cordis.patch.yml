@@ -1,0 +1,17 @@
+# dsh-task-splitter bundle patch: inserts the plugin row into the profile roster.
+- insert:
+    - id: task-splitter
+      name: dsh-task-splitter
+      config:
+        enabled: true
+        providers:
+          - qwen-local
+        lanes:
+          - parts
+          - plan
+        minScore: 3
+        workflowScore: 3
+        maxParts: 8
+        wordsPerPart: 900
+        tasksDir: tasks
+        toolPath: D:\dsh\.local-llm\tools\task-parts.mjs

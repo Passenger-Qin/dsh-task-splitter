@@ -1,0 +1,5 @@
+node_modules/
+*.tgz
+check-toolpath.mjs
+demo-stock.mjs
+profcheck.mjs
