@@ -68,6 +68,7 @@ Requires a DSH host that exposes `agent/pre-step`, `ctx.agents` and `ctx.session
     wordsPerPart: 900         # Lane A: target chars per part
     tasksDir: tasks           # relative to the session working directory
     toolPath: ''              # CLI used in the injected rules; defaults to the bundled one
+    extraRules: ''            # 追加到注入规程末尾的补充说明（放环境特定的工具名/服务地址）
 ```
 
 ## Bundled CLI
