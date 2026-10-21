@@ -89,8 +89,11 @@ node bin/task-parts.mjs assemble <taskDir>   # concatenates into final.md
   tomorrow's stock move — the procedure makes it say so instead of inventing numbers.
 - Detection is heuristic. `workflowScore` / `minScore` are the knobs; the plugin never blocks a turn — worst case it
   adds one short instruction message.
-- Tested against a Windows DSH 0.2.0-rc.2 host with llama.cpp-served Qwen3; 27 offline simulation cases ship in
-  [`test-sim.mjs`](./test-sim.mjs) (not included in the npm tarball).
+- Tested against Windows DSH 0.2.0-rc.2 and 0.2.1-rc.2 hosts (`session.header.cwd`) with llama.cpp-served Qwen3;
+  30 offline simulation cases ship in [`test-sim.mjs`](./test-sim.mjs) (not included in the npm tarball).
+- **0.1.2 note:** DSH 0.2.1+ moved the session working directory to `session.header.cwd` (no `session.cwd` /
+  `session.meta` any more). 0.1.1 and earlier silently skipped every long task on those hosts; 0.1.2 resolves
+  `header.cwd` first and still falls back to the 0.1.x shapes.
 
 ## License
 
@@ -129,5 +132,8 @@ dsh plugin --profile <你的profile> add dsh-task-splitter
 **局限**：车道 B 保证的是**过程与诚实性**（计划、证据落盘、来源、不确定性、禁止编造数据），**不保证答案正确**；
 本地没有行情/财务数据源时，它就该说"给不出可靠结论"，而不是编数字。检测是启发式的，
 `workflowScore` / `minScore` 可调；最坏情况只是多注入一条很短的指令，不会阻塞任何一轮。
+
+**0.1.2 修复**：DSH 0.2.1+ 把会话工作目录挪到了 `session.header.cwd`（实例上不再有 `cwd` / `meta`）。
+0.1.1 及更早在这些宿主上会**静默跳过**所有长任务；0.1.2 改为优先读 `header.cwd`，同时保留 0.1.x 的旧形态回退。
 
 MIT 许可。

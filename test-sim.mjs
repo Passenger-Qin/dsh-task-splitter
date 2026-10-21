@@ -18,7 +18,7 @@ const BASE = 'D:\\dsh\\_shared\\splitter-test';
 fs.rmSync(BASE, { recursive: true, force: true });
 fs.mkdirSync(BASE, { recursive: true });
 
-function rig(config, { cwd = BASE, provider = 'qwen-local' } = {}) {
+function rig(config, { cwd = BASE, provider = 'qwen-local', cwdShape = 'meta' } = {}) {
   const handlers = new Map();
   const ctx = {
     logger: { info: () => {}, warn: (...a) => console.log('    [warn]', ...a) },
@@ -27,7 +27,8 @@ function rig(config, { cwd = BASE, provider = 'qwen-local' } = {}) {
   apply(ctx, config);
   const session = {
     id: 's-' + Math.random().toString(36).slice(2, 8),
-    meta: { cwd },
+    // 0.1.x 宿主：cwd 在 meta.cwd；0.2.1+ 宿主：cwd 只在 header.cwd（无 meta、无 cwd getter）
+    ...(cwdShape === 'header' ? { header: { cwd } } : { meta: { cwd } }),
     requestHeader: () => ({ config: { provider, model: 'qwen-test' } }),
   };
   const agent = { id: 'a1', session };
@@ -171,6 +172,17 @@ console.log('用例 13：车道可单独关闭（lanes: [parts]）');
   const { run } = rig({ lanes: ['parts'], tasksDir: 'tasks-lane-off' });
   const d = await run('帮我选一只明天大概率会涨的股票');
   check(d.messages.length === 1, '关闭 plan 车道后不拆流程型任务');
+}
+
+console.log('用例 14：0.2.1+ 宿主（cwd 只在 session.header.cwd）仍能拆');
+{
+  const { run } = rig({ tasksDir: 'tasks-header-cwd' }, { cwdShape: 'header' });
+  const d = await run('帮我调研一下国产开源数据库的现状，并给出选型建议');
+  check(d.messages.length === 2, 'header.cwd 会话注入了规程');
+  const text = d.messages[0]?.content?.map((b) => b.text).join('') ?? '';
+  check(/【流程型长任务/.test(text), '走流程车道');
+  const dir = /工作目录：(.+)/.exec(text)?.[1]?.trim() ?? '';
+  check(Boolean(dir) && fs.existsSync(path.join(dir, 'PLAN.md')), 'PLAN.md 已建');
 }
 
 console.log(`\n结果: ${pass} passed, ${fail} failed`);

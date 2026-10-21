@@ -1,6 +1,6 @@
 {
   "name": "dsh-task-splitter",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "DSH host plugin: detect long tasks (long-output and multi-step kinds) and auto-split them for small-context local models — scaffolds a parts skeleton or a PLAN.md ledger and injects the execution rules.",
   "type": "module",
   "main": "lib/index.js",
